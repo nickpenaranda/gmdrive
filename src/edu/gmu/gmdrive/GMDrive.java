@@ -29,11 +29,18 @@ public class GMDrive extends NiftyOverlayBasicGame {
 	Vehicle mDriverVehicle;
 	ArrayList<Waypoint> mWaypoints;
 	
+	/*
+	 * CHANGE THESE VALUES TO REFLECT SYSTEM CONFIG
+	 */
 	public static final int JOY_INDEX = 0;
 
 	public static final int AXIS_ACC = 2;
 	public static final int AXIS_BRAKE = 3;
 	public static final int AXIS_STEER = 0;
+	public static final int SCREEN_W = 1440;
+	public static final int SCREEN_H = 900;
+	
+	public static final boolean USE_JOYSTICK = false;
 	
 	public static final int PATH_INTERVAL = 250;
 	ArrayList<Vector2f> mPath;
@@ -150,13 +157,29 @@ public class GMDrive extends NiftyOverlayBasicGame {
 		if(mInput.isKeyDown(Input.KEY_ESCAPE))
 			container.exit();
 		
-		steeringInput = mInput.getAxisValue(JOY_INDEX, AXIS_STEER);
-		brakeInput = -(mInput.getAxisValue(JOY_INDEX, AXIS_BRAKE) - 1.0f) / 2;
-		accInput = -(mInput.getAxisValue(JOY_INDEX, AXIS_ACC) - 1.0f) / 2;
+		if(USE_JOYSTICK) {
+  		steeringInput = mInput.getAxisValue(JOY_INDEX, AXIS_STEER);
+  		brakeInput = -(mInput.getAxisValue(JOY_INDEX, AXIS_BRAKE) - 1.0f) / 2;
+  		accInput = -(mInput.getAxisValue(JOY_INDEX, AXIS_ACC) - 1.0f) / 2;
 
-		//if(Math.abs(steeringInput) < 0.1f) steeringInput = 0f;
-		if(Math.abs(accInput) < 0.1f) accInput = 0f;
-		if(Math.abs(brakeInput) < 0.1f) brakeInput = 0f;
+  		//if(Math.abs(steeringInput) < 0.1f) steeringInput = 0f;
+      if(Math.abs(accInput) < 0.1f) accInput = 0f;
+      if(Math.abs(brakeInput) < 0.1f) brakeInput = 0f;
+		} else {
+		  /* Steering */
+		  if(mInput.isKeyDown(Input.KEY_A)) steeringInput = -1.0f;
+		  else if(mInput.isKeyDown(Input.KEY_D)) steeringInput = 1.0f;
+		  else steeringInput = 0.0f;
+		  
+		  /* Accelerator */
+		  if(mInput.isKeyDown(Input.KEY_W)) accInput = 1.0f;
+		  else accInput = 0.0f;
+		  
+		  /* Brakes */
+		  if(mInput.isKeyDown(Input.KEY_S)) brakeInput = 1.0f;
+		  else brakeInput = 0.0f;
+		}
+
 
 		mDriverVehicle.setSteering(steeringInput);
 		mDriverVehicle.setBrakes(brakeInput);
@@ -202,7 +225,7 @@ public class GMDrive extends NiftyOverlayBasicGame {
 			gameContainer.setAlwaysRender(true);
 			gameContainer.setMaximumLogicUpdateInterval(20);
 			gameContainer.setMinimumLogicUpdateInterval(10);
-			gameContainer.setDisplayMode(1680, 1050, true);
+			gameContainer.setDisplayMode(SCREEN_W, SCREEN_H, true);
 			gameContainer.setTargetFrameRate(60);
 			gameContainer.start();
 		} catch (SlickException e) {

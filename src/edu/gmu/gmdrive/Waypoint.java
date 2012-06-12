@@ -1,8 +1,5 @@
 package edu.gmu.gmdrive;
 
-import java.nio.IntBuffer;
-
-import org.lwjgl.openal.AL10;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;

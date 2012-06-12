@@ -8,15 +8,12 @@ import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.util.WaveData;
-import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Vector2f;
 
 public class PointSound {
-	private static final float VISUAL_RADIUS = 16; 
-	
 	private IntBuffer mBuffer;
 	private IntBuffer mSource;
 	private Vector2f mPos, mVel;

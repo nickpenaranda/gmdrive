@@ -108,7 +108,6 @@ public class Vehicle extends RigidBody {
 	private class Wheel {
 		private Vector2f mForwardAxis, mSideAxis;
 		private Vector2f mPosition;
-		private Vector2f mResponseForce;
 		
 		private float mWheelTorque, mWheelSpeed, mWheelInertia, mWheelRadius;
 		private float mSteeringAngle;
@@ -116,7 +115,6 @@ public class Vehicle extends RigidBody {
 		
 		public Wheel(String id, Vector2f position, float radius) {
 			mID = id;
-			mResponseForce = new Vector2f();
 			mPosition = position;
 			
 			mWheelRadius = radius;
@@ -172,7 +170,6 @@ public class Vehicle extends RigidBody {
 				mWheelSpeed = 0.0f;
 			
 			mWheelTorque = 0;
-			mResponseForce = responseForce;
 			return(responseForce);
 		}
 		

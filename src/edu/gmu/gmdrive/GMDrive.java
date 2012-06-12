@@ -7,9 +7,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
-import org.lwjgl.openal.AL11;
 import org.newdawn.slick.AppGameContainer;
-import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -18,10 +16,6 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Vector2f;
 
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.builder.LayerBuilder;
-import de.lessvoid.nifty.builder.PanelBuilder;
-import de.lessvoid.nifty.builder.ScreenBuilder;
-import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.slick2d.NiftyOverlayBasicGame;
 
 public class GMDrive extends NiftyOverlayBasicGame {
@@ -35,7 +29,7 @@ public class GMDrive extends NiftyOverlayBasicGame {
 	public static final float MILE_TO_METER = 1609.3f;
 	public static final float METER_TO_MILE = 1 / MILE_TO_METER;
 	
-  public static final float MPH_TO_MPS = 0.447f;
+	public static final float MPH_TO_MPS = 0.447f;
 	public static final float MPS_TO_MPH = 1 / MPH_TO_MPS;
 	
 	/*

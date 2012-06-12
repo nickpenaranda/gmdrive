@@ -30,10 +30,18 @@ public class GMDrive extends NiftyOverlayBasicGame {
 	ArrayList<Waypoint> mWaypoints;
 	
 	/*
+	 * CONVERSION CONSTANTS
+	 */
+	public static final float MILE_TO_METER = 1609.3f;
+	public static final float METER_TO_MILE = 1 / MILE_TO_METER;
+	
+  public static final float MPH_TO_MPS = 0.447f;
+	public static final float MPS_TO_MPH = 1 / MPH_TO_MPS;
+	
+	/*
 	 * CHANGE THESE VALUES TO REFLECT SYSTEM CONFIG
 	 */
 	public static final int JOY_INDEX = 0;
-
 	public static final int AXIS_ACC = 2;
 	public static final int AXIS_BRAKE = 3;
 	public static final int AXIS_STEER = 0;
@@ -42,16 +50,22 @@ public class GMDrive extends NiftyOverlayBasicGame {
 	
 	public static final boolean USE_JOYSTICK = false;
 	
+	/*
+	 * EXPERIMENT PARAMETERS
+	 */
+	public static final Vector2f START_POSITION = new Vector2f(MILE_TO_METER * 1.0f, MILE_TO_METER * 1.0f);
+	
 	public static final int PATH_INTERVAL = 250;
 	ArrayList<Vector2f> mPath;
 	int mPathTick;
-	
 	
 	MessageWindow mMessageWindow;
 	Grid mGrid;
 	
 	Input mInput;
 	float steeringInput, accInput, brakeInput;
+	int startTime,simTime;
+	
 	
 	public static final float WORLD_SCALE = 0.5f;
 	public GMDrive() {
@@ -82,7 +96,7 @@ public class GMDrive extends NiftyOverlayBasicGame {
 		
 		Waypoint sound;
 		sound = new Waypoint();
-		sound.setLoc(new Vector2f(1280.0f, 960.0f), new Vector2f(0.0f, 0.0f));
+		sound.setLoc(START_POSITION.copy().add(new Vector2f(0.5f * MILE_TO_METER, 0.0f)), new Vector2f(0.0f, 0.0f));
 		sound.play();
 		
 		mWaypoints.add(sound);
@@ -101,7 +115,7 @@ public class GMDrive extends NiftyOverlayBasicGame {
 		mRigidBodies = new ArrayList<RigidBody>();
 		
 		mDriverVehicle = new Vehicle();
-		mDriverVehicle.setLocation(new Vector2f(50.0f, 50.0f), 0);
+		mDriverVehicle.setLocation(START_POSITION, 0);
 		
 		mRigidBodies.add(mDriverVehicle);
 		
@@ -112,17 +126,19 @@ public class GMDrive extends NiftyOverlayBasicGame {
 		mMessageWindow.add("Ready.");
 		
 		container.getGraphics().setWorldClip(0.0f,0.0f,(float)container.getWidth() / WORLD_SCALE,(float)container.getHeight() / WORLD_SCALE);
+		
+		startTime = simTime = 0;
 	}
 
 	@Override
 	public void renderGame(GameContainer container, Graphics g) throws SlickException {
 		g.setFont(mMessageWindow.getFont());
-		g.drawString("Steering: " + steeringInput, 0, 32);
-		g.drawString("Throttle: " + accInput, 0, 48);
-		g.drawString("  Brakes: " + brakeInput, 0, 64);
+		g.drawString("Steering: " + steeringInput, 0, 0);
+		g.drawString("Throttle: " + accInput, 0, 16);
+		g.drawString("  Brakes: " + brakeInput, 0, 32);
 		
 		float vehSpeed = mDriverVehicle.getSpeedometer();
-		g.drawString("   Speed: " + String.format("%.2f", vehSpeed * 2.2369) + " mph", 0, 80);
+		g.drawString("   Speed: " + String.format("%.2f", vehSpeed * 2.2369) + " mph", 0, 48);
 				
 		/* World coordinates */
 		g.pushTransform();
@@ -152,6 +168,7 @@ public class GMDrive extends NiftyOverlayBasicGame {
 
 	@Override
 	public void updateGame(GameContainer container, int delta) throws SlickException {
+	  simTime += delta;
 		mMessageWindow.update(container, delta);
 		
 		if(mInput.isKeyDown(Input.KEY_ESCAPE))
@@ -179,7 +196,6 @@ public class GMDrive extends NiftyOverlayBasicGame {
 		  if(mInput.isKeyDown(Input.KEY_S)) brakeInput = 1.0f;
 		  else brakeInput = 0.0f;
 		}
-
 
 		mDriverVehicle.setSteering(steeringInput);
 		mDriverVehicle.setBrakes(brakeInput);
@@ -227,6 +243,7 @@ public class GMDrive extends NiftyOverlayBasicGame {
 			gameContainer.setMinimumLogicUpdateInterval(10);
 			gameContainer.setDisplayMode(SCREEN_W, SCREEN_H, true);
 			gameContainer.setTargetFrameRate(60);
+			gameContainer.setShowFPS(false);
 			gameContainer.start();
 		} catch (SlickException e) {
 			e.printStackTrace();

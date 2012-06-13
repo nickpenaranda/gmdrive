@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<route name="Route B">
+	<waypoint x="0.5" y="0.75" />
+	<waypoint x="1.5" y="0.75" />
+</route>

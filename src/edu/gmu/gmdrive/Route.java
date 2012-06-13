@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Vector;
+import java.util.LinkedList;
 
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Vector2f;
@@ -16,11 +16,11 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 public class Route extends DefaultHandler {
-	private Vector<Waypoint> mWaypoints;
+	private LinkedList<Waypoint> mWaypoints;
 	private String mRouteName;
 	
 	public Route(String filename) {
-		mWaypoints = new Vector<Waypoint>();
+		mWaypoints = new LinkedList<Waypoint>();
 		mRouteName = "Untitled Route";
 		
 		File file = new File(filename);
@@ -70,5 +70,9 @@ public class Route extends DefaultHandler {
 			if(tmp != null) mWaypoints.add(tmp);
 		}
 		
+	}
+	
+	public Waypoint getNext() {
+		return(mWaypoints.poll());
 	}
 }

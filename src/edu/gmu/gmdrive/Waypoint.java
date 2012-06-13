@@ -7,7 +7,7 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Vector2f;
 
 public class Waypoint extends PointSound {
-	private static final float VISUAL_RADIUS = 16; 
+	private static final float VISUAL_RADIUS = 100; 
 	private int mPingInterval,mPingAccumulator;
 	
 	//private FloatBuffer mSourcePos, mSourceVel;

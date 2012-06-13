@@ -21,7 +21,9 @@ import de.lessvoid.nifty.slick2d.NiftyOverlayBasicGame;
 public class GMDrive extends NiftyOverlayBasicGame {
 	ArrayList<RigidBody> mRigidBodies;
 	Vehicle mDriverVehicle;
-	ArrayList<Waypoint> mWaypoints;
+	//ArrayList<Waypoint> mWaypoints;
+	Waypoint mNextWaypoint;
+	Route mRoute;
 	
 	/*
 	 * CONVERSION CONSTANTS
@@ -39,10 +41,11 @@ public class GMDrive extends NiftyOverlayBasicGame {
 	public static final int AXIS_ACC = 2;
 	public static final int AXIS_BRAKE = 3;
 	public static final int AXIS_STEER = 0;
-	public static final int SCREEN_W = 1440;
-	public static final int SCREEN_H = 900;
+	public static final int SCREEN_W = 800;
+	public static final int SCREEN_H = 800;
 	
 	public static final boolean USE_JOYSTICK = false;
+	public static final boolean TESTING_MODE = true;
 	
 	/*
 	 * EXPERIMENT PARAMETERS
@@ -61,7 +64,7 @@ public class GMDrive extends NiftyOverlayBasicGame {
 	int startTime,simTime;
 	
 	
-	public static final float WORLD_SCALE = 0.5f;
+	public static final float WORLD_SCALE = SCREEN_H / MILE_TO_METER / 2;
 	public GMDrive() {
 		super("GMDrive");
 	}
@@ -81,49 +84,41 @@ public class GMDrive extends NiftyOverlayBasicGame {
 			container.exit();
 		}
 		
-		/* Set up GUI */
-		
-		
-		mMessageWindow = new MessageWindow();
-		mGrid = new Grid();
-		mWaypoints = new ArrayList<Waypoint>();
-		
-		Waypoint sound;
-		sound = new Waypoint();
-		sound.setLoc(START_POSITION.copy().add(new Vector2f(0.5f * MILE_TO_METER, 0.0f)), new Vector2f(0.0f, 0.0f));
-		sound.play();
-		
-		mWaypoints.add(sound);
-
-		AL10.alListener3f(AL10.AL_POSITION, 0f, 0f, 0f);
-		AL10.alListener3f(AL10.AL_VELOCITY, 0f, 0f, 0f);		
-		FloatBuffer listenerOri =
-				BufferUtils.createFloatBuffer(6).put(new float[] { 0.0f, 0.0f, -1.0f,  0.0f, 1.0f, 0.0f });
-		listenerOri.rewind();
-		AL10.alListener(AL10.AL_ORIENTATION, listenerOri);
-		
-
-		mInput = container.getInput();
-		steeringInput = accInput = brakeInput = 0;
-		
-		mRigidBodies = new ArrayList<RigidBody>();
-		
-		mDriverVehicle = new Vehicle();
-		mDriverVehicle.setLocation(START_POSITION, 0);
-		
-		mRigidBodies.add(mDriverVehicle);
-		
 		mPath = new ArrayList<Vector2f>();
-		mPathTick = 0;
-		
-		mMessageWindow.add("GMDrive is loading...");
-		mMessageWindow.add("Ready.");
-		
+		mRigidBodies = new ArrayList<RigidBody>();
+		mInput = container.getInput();
 		container.getGraphics().setWorldClip(0.0f,0.0f,(float)container.getWidth() / WORLD_SCALE,(float)container.getHeight() / WORLD_SCALE);
 		
-		startTime = simTime = 0;
+		/* Set up GUI */
+		mMessageWindow = new MessageWindow();
+		mGrid = new Grid();
+		
+		initScenario("route4.xml");
 	}
 
+	private void initScenario(String filename) {
+		mMessageWindow.add("GMDrive is loading " + filename + "...");
+		mRoute =  new Route(filename);
+		
+		steeringInput = accInput = brakeInput = 0;
+		startTime = simTime = 0;
+		mPathTick = 0;
+		
+		/* Init driver vehicle and set position to first waypoint */
+		mDriverVehicle = new Vehicle();
+		Vector2f pos = mRoute.getNext().getPos();
+		mDriverVehicle.setLocation(pos, (float)Math.PI);
+		mRigidBodies.add(mDriverVehicle);
+		
+		try {
+			mNextWaypoint = new Waypoint();
+		} catch (SlickException e) {
+			e.printStackTrace();
+		}
+		mNextWaypoint.setLoc(mRoute.getNext().getPos(), new Vector2f(0.0f, 0.0f));
+		
+		mMessageWindow.add("Ready.");
+	}
 	@Override
 	public void renderGame(GameContainer container, Graphics g) throws SlickException {
 		g.setFont(mMessageWindow.getFont());
@@ -149,9 +144,9 @@ public class GMDrive extends NiftyOverlayBasicGame {
 				g.fillRect(pathNode.x - 0.5f, pathNode.y - 0.5f, 1.0f, 1.0f);
 				lastNode = pathNode;
 			}
-			for(Waypoint sound : mWaypoints) {
-				sound.render(container, g);
-			}
+
+			if(mNextWaypoint != null) mNextWaypoint.render(container, g);
+			
 			for(RigidBody rb : mRigidBodies) {
 				rb.render(container, g);
 			}
@@ -212,14 +207,17 @@ public class GMDrive extends NiftyOverlayBasicGame {
 		listenerOri.rewind();
 		AL10.alListener(AL10.AL_ORIENTATION, listenerOri);
 		
-		/* Update ping rates for waypoints */
-		for(Waypoint ps : mWaypoints) {
-			float dist = driverPos.distance(ps.getPos());
-			int roundDist = Math.round(dist) * 2;
-			ps.setPingInterval(roundDist < 200 ? 200 : roundDist);
-			ps.update(delta);
+		/* Update waypoint */
+		if(mNextWaypoint != null) {
+			float dist = driverPos.distance(mNextWaypoint.getPos());
+			int roundDist = Math.round(dist);
+			if(roundDist < 100)
+				mNextWaypoint = mRoute.getNext();
+			if(mNextWaypoint != null) { 
+				mNextWaypoint.setPingInterval((roundDist * 2) < 200 ? 200 : roundDist * 2);
+				mNextWaypoint.update(delta);
+			}
 		}
-		
 		/* Path saving */
 		mPathTick += delta;
 		if(mPathTick > PATH_INTERVAL) {
@@ -235,7 +233,7 @@ public class GMDrive extends NiftyOverlayBasicGame {
 			gameContainer.setAlwaysRender(true);
 			gameContainer.setMaximumLogicUpdateInterval(20);
 			gameContainer.setMinimumLogicUpdateInterval(10);
-			gameContainer.setDisplayMode(SCREEN_W, SCREEN_H, true);
+			gameContainer.setDisplayMode(SCREEN_W, SCREEN_H, false);
 			gameContainer.setTargetFrameRate(60);
 			gameContainer.setShowFPS(false);
 			gameContainer.start();

@@ -164,26 +164,25 @@ public class GMDrive extends NiftyOverlayBasicGame {
 			container.exit();
 		
 		if(USE_JOYSTICK) {
-  		steeringInput = mInput.getAxisValue(JOY_INDEX, AXIS_STEER);
-  		brakeInput = -(mInput.getAxisValue(JOY_INDEX, AXIS_BRAKE) - 1.0f) / 2;
-  		accInput = -(mInput.getAxisValue(JOY_INDEX, AXIS_ACC) - 1.0f) / 2;
-
-  		//if(Math.abs(steeringInput) < 0.1f) steeringInput = 0f;
-      if(Math.abs(accInput) < 0.1f) accInput = 0f;
-      if(Math.abs(brakeInput) < 0.1f) brakeInput = 0f;
+	  		steeringInput = mInput.getAxisValue(JOY_INDEX, AXIS_STEER);
+	  		brakeInput = -(mInput.getAxisValue(JOY_INDEX, AXIS_BRAKE) - 1.0f) / 2;
+	  		accInput = -(mInput.getAxisValue(JOY_INDEX, AXIS_ACC) - 1.0f) / 2;
+	
+			if(Math.abs(accInput) < 0.1f) accInput = 0f;
+			if(Math.abs(brakeInput) < 0.1f) brakeInput = 0f;
 		} else {
-		  /* Steering */
-		  if(mInput.isKeyDown(Input.KEY_A)) steeringInput = -1.0f;
-		  else if(mInput.isKeyDown(Input.KEY_D)) steeringInput = 1.0f;
-		  else steeringInput = 0.0f;
-		  
-		  /* Accelerator */
-		  if(mInput.isKeyDown(Input.KEY_W)) accInput = 1.0f;
-		  else accInput = 0.0f;
-		  
-		  /* Brakes */
-		  if(mInput.isKeyDown(Input.KEY_S)) brakeInput = 1.0f;
-		  else brakeInput = 0.0f;
+			/* Steering */
+			if(mInput.isKeyDown(Input.KEY_A)) steeringInput = -1.0f;
+			else if(mInput.isKeyDown(Input.KEY_D)) steeringInput = 1.0f;
+			else steeringInput = 0.0f;
+
+			/* Accelerator */
+			if(mInput.isKeyDown(Input.KEY_W)) accInput = 1.0f;
+			else accInput = 0.0f;
+
+			/* Brakes */
+			if(mInput.isKeyDown(Input.KEY_S)) brakeInput = 1.0f;
+			else brakeInput = 0.0f;
 		}
 
 		mDriverVehicle.setSteering(steeringInput);

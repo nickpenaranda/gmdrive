@@ -165,7 +165,7 @@ public class Vehicle extends RigidBody {
 			mWheelTorque += forwardMag * mWheelRadius;
 			
 			float preSign = Math.signum(mWheelSpeed);
-			mWheelSpeed += mWheelTorque * mWheelRadius / mWheelInertia * timeStep;
+			mWheelSpeed += mWheelTorque * mWheelRadius / mWheelInertia * timeStep; // Bad integrator
 			if(preSign != 0.0f && Math.signum(mWheelSpeed) != preSign)
 				mWheelSpeed = 0.0f;
 			

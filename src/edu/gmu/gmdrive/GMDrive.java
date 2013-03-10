@@ -1,7 +1,11 @@
 package edu.gmu.gmdrive;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -46,6 +50,7 @@ public class GMDrive extends NiftyOverlayBasicGame {
 	
 	public static final boolean USE_JOYSTICK = false;
 	public static final boolean TESTING_MODE = true;
+	public static final boolean RECORD_DATA = true;
 	
 	/*
 	 * EXPERIMENT PARAMETERS
@@ -63,6 +68,7 @@ public class GMDrive extends NiftyOverlayBasicGame {
 	float steeringInput, accInput, brakeInput;
 	int startTime,simTime;
 	
+	FileWriter outputFile;
 	
 	public static final float WORLD_SCALE = SCREEN_H / MILE_TO_METER / 2;
 	public GMDrive() {
@@ -89,6 +95,16 @@ public class GMDrive extends NiftyOverlayBasicGame {
 		mInput = container.getInput();
 		container.getGraphics().setWorldClip(0.0f,0.0f,(float)container.getWidth() / WORLD_SCALE,(float)container.getHeight() / WORLD_SCALE);
 		
+		if(RECORD_DATA) {
+			try {
+				outputFile = new FileWriter( new SimpleDateFormat("ddMMyy-hhmmss").format(new Date()) + ".csv");
+				outputFile.append("Time (ms),OwnX,OwnY,Accelerator,Brake,Steering,Speed (mph),TargetX,TargetY\n");
+			} catch(IOException e) {
+				e.printStackTrace();
+				container.exit();
+			}
+			
+		}
 		/* Set up GUI */
 		mMessageWindow = new MessageWindow();
 		mGrid = new Grid();
@@ -157,6 +173,9 @@ public class GMDrive extends NiftyOverlayBasicGame {
 
 	@Override
 	public void updateGame(GameContainer container, int delta) throws SlickException {
+		if(RECORD_DATA)
+				recordData();
+		
 	  simTime += delta;
 		mMessageWindow.update(container, delta);
 		
@@ -225,6 +244,28 @@ public class GMDrive extends NiftyOverlayBasicGame {
 		}
 	}
 	
+	private void recordData() {
+		String row = 
+				String.format("%d,%f,%f,%f,%f,%f,%f,%f,%f\n",
+						simTime,
+						mDriverVehicle.getLocation().x,
+						mDriverVehicle.getLocation().y,
+						accInput,
+						brakeInput,
+						steeringInput,
+						mDriverVehicle.getSpeedometer() * 2.2369,
+						mNextWaypoint.getPos().x,
+						mNextWaypoint.getPos().y);
+		//outputFile.append("Time,OwnX,OwnY,Accelerator,Brake,Steering,TargetX,TargetY\n");
+		try {
+			outputFile.append(row);
+			outputFile.flush();
+		} catch(IOException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+
 	public static void main(String[] args) {
 		try {
 			AppGameContainer gameContainer = new AppGameContainer(new GMDrive());
@@ -240,6 +281,23 @@ public class GMDrive extends NiftyOverlayBasicGame {
 			e.printStackTrace();
 			System.exit(-1);
 		}
+	}
+	
+	
+
+	@Override
+	public boolean closeRequested() {
+		if(RECORD_DATA) {
+			try {
+				outputFile.flush();
+				outputFile.close();
+			} catch(IOException e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		}
+		
+		return super.closeRequested();
 	}
 
 	@Override
